@@ -1,12 +1,13 @@
 version: 2 # define that we use version 2 format
-jobs: # every config file, must have a build job
+jobs: # every config file, must have a build job, this is the only job that will be automatically picked up and run by circle CI
   build:
-    working_directory: /dockerapp
-    docker:
-      - image: docker:17.05.0-ce-git
+    working_directory: /dockerapp # in th job we specify a working directory, this path will be used as the default working directory for the rest of the job
+    docker: #we specify primary container images for this job under docker, in this we define the cercle environment. this enviroment is where our steps will be executed
+      # in cercleCI all the tests will be run inside the containers
+      - image: docker:17.05.0-ce-git # outer container
     steps:
-      - checkout
-      - setup_remote_docker
+      - checkout # https://stackoverflow.com/questions/812308/how-do-you-check-out-code
+      - setup_remote_docker # to build docker images for deployement, which create a seperate environment for each build for security #
       - run:
           name: Install dependencies
           command: |
