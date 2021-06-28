@@ -2,8 +2,7 @@ version: 2 # define that we use version 2 format
 jobs: # every config file, must have a build job, this is the only job that will be automatically picked up and run by circle CI
   build:
     working_directory: /dockerapp # in th job we specify a working directory, this path will be used as the default working directory for the rest of the job
-    docker: #we specify primary container images for this job under docker, in this we define the cercle environment. this enviroment is where our steps will be executed
-      # in cercleCI all the tests will be run inside the containers
+    docker: #we specify primary container images for this job under docker, in this we define the cercle environment. this enviroment is where our steps will be executed # in cercleCI all the tests will be run inside the containers
       - image: docker:17.05.0-ce-git # outer container
     steps:
       - checkout # https://stackoverflow.com/questions/812308/how-do-you-check-out-code
@@ -18,3 +17,17 @@ jobs: # every config file, must have a build job, this is the only job that will
           command: |
             docker-compose up -d
             docker-compose run dockerapp python test.py
+      - deploy: # run if all tests are green
+          name: Push application Docker image
+          command: |
+            docker login -e $DOCKER_HUB_EMAIL -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD 
+            docker tag dockerapp_dockerapp $DOCKER_HUB_USER_ID/dockerapp:$CIRCLE_SHA1 
+            docker tag dockerapp_dockerapp $DOCKER_HUB_USER_ID/dockerapp:latest
+            docker push $DOCKER_HUB_USER_ID/dockerapp:$CIRCLE_SHA1
+            docker push $DOCKER_HUB_USER_ID/dockerapp:latest
+
+# 1 login into our dockerhub using dockerhub credentials defined on ENV varible on CircleCI
+#2 tag our docker images (one is git hash of source code other is latest)
+# (docker tag local_image_name_repository_name/image_name:tag (pcq docker-compose tjr prefixe img w/ work_dir name))
+# $CIRCLE_SHA1 var ENV in circle CI which contains then current commit hash of repo
+# 3 push image to dockerhub
