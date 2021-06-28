@@ -1,5 +1,5 @@
-version: 2
-jobs:
+version: 2 # define that we use version 2 format
+jobs: # every config file, must have a build job
   build:
     working_directory: /dockerapp
     docker:
